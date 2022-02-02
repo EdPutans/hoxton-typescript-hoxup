@@ -1,31 +1,32 @@
 import { useEffect, useState } from 'react'
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { Navigate, NavigateFunction, Route, Routes, useNavigate } from 'react-router-dom'
 
 import Login from './pages/Login'
 import Main from './pages/Main'
 import NotFound from './pages/NotFound'
+import { User, ModalType } from './types'
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState(null)
-  const [modal, setModal] = useState('')
-  const [users, setUsers] = useState([])
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [modal, setModal] = useState<ModalType>('')
+  const [users, setUsers] = useState<User[]>([])
 
-  useEffect(() => {
+  useEffect((): void => {
     fetch('http://localhost:4000/users')
-      .then(resp => resp.json())
+      .then((resp) => resp.json())
       .then(users => setUsers(users))
   }, [])
 
-  const navigate = useNavigate()
+  const navigate: NavigateFunction = useNavigate()
 
-  function logIn(user) {
+  function logIn(user: User): void {
     // set user in state as the current user
     setCurrentUser(user)
     // navigate to the main page
     navigate('/logged-in')
   }
 
-  function logOut() {
+  function logOut(): void {
     setCurrentUser(null)
   }
 

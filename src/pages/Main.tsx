@@ -1,17 +1,26 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { NavigateFunction, useNavigate, useParams } from 'react-router-dom'
 import Conversation from '../components/Conversation'
+import { ConversationWithMessages, ModalType, User } from '../types'
 
-function Main({ currentUser, logOut, users, setModal, modal }) {
-  const [conversations, setConversations] = useState([])
+interface Props {
+  currentUser: User | null;
+  logOut: () => void;
+  users: User[];
+  setModal: (modal: ModalType) => void;
+  modal: ModalType;
+}
+
+function Main({ currentUser, logOut, users, setModal, modal }: Props) {
+  const [conversations, setConversations] = useState<ConversationWithMessages[]>([])
   const params = useParams()
-  const navigate = useNavigate()
+  const navigate: NavigateFunction = useNavigate()
 
-  useEffect(() => {
+  useEffect((): void => {
     if (currentUser === null) navigate('/')
   }, [currentUser, navigate])
 
-  useEffect(() => {
+  useEffect((): void => {
     if (currentUser === null) return
 
     fetch(`http://localhost:4000/conversations?userId=${currentUser.id}`)
@@ -19,7 +28,7 @@ function Main({ currentUser, logOut, users, setModal, modal }) {
       .then(conversations => setConversations(conversations))
   }, [currentUser])
 
-  const usersIHaveNotTalkedToYet = users.filter(user => {
+  const usersIHaveNotTalkedToYet: User[] = users.filter(user => {
     // when do I want to keep this user?
 
     // don't show the currently logged in user
@@ -37,7 +46,9 @@ function Main({ currentUser, logOut, users, setModal, modal }) {
     return true
   })
 
-  function createConversation(participantId) {
+  function createConversation(participantId: number) {
+    if (!currentUser) return;
+
     fetch('http://localhost:4000/conversations', {
       method: 'POST',
       headers: {
@@ -55,7 +66,7 @@ function Main({ currentUser, logOut, users, setModal, modal }) {
       })
   }
 
-  if (currentUser === null) return <h1>Not signed in...</h1>
+  if (!currentUser) return <h1>Not signed in...</h1>
 
   return (
     <div className="main-wrapper">
@@ -106,7 +117,7 @@ function Main({ currentUser, logOut, users, setModal, modal }) {
 
             // what are their details?
             const talkingToUser = users.find(user => user.id === talkingToId)
-
+            if (!talkingToUser) return null;
             return (
               <li key={conversation.id}>
                 <button

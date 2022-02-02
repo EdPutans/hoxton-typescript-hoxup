@@ -1,6 +1,13 @@
 import UserLoginItem from '../components/UserLoginItem'
+import { ModalType, User } from '../types'
 
-function Login ({ users, logIn, setModal }) {
+type Props = {
+  users: User[];
+  logIn: (user: User) => void;
+  setModal: (modal: ModalType) => void;
+}
+
+function Login({ users, logIn, setModal }: Props) {
   return (
     <div className='main-wrapper login'>
       <section className='login-section'>

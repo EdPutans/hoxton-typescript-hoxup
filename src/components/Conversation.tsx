@@ -1,14 +1,25 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { ConversationWithMessages, User } from '../types'
 import Message from './Message'
 
-function Conversation({ currentUser }) {
-  const [currentConversation, setCurrentConversation] = useState(null)
+type FormType = HTMLFormElement & { text: HTMLInputElement }
 
-  const params = useParams()
+type Props = {
+  currentUser: User | null;
+}
 
-  function createMessage(text) {
+function Conversation({ currentUser }: Props) {
+  const [currentConversation, setCurrentConversation] = useState<ConversationWithMessages | null>(null)
+
+  const params = useParams();
+
+  function createMessage(text: string) {
     // create a message on the server ✅
+    if (!currentUser) {
+      console.error('no current user!')
+      return;
+    };
 
     fetch('http://localhost:4000/messages', {
       method: 'POST',
@@ -43,7 +54,8 @@ function Conversation({ currentUser }) {
     }
   }, [params.conversationId])
 
-  if (currentConversation === null) return <h1>Loading...</h1>
+  if (!currentConversation) return <h1>Loading...</h1>
+  if (!currentUser) return <h1>There is no current user. Refresh the page please</h1>;
 
   return (
     <main className='conversation'>
@@ -64,10 +76,11 @@ function Conversation({ currentUser }) {
       <footer>
         <form
           className='panel conversation__message-box'
-          onSubmit={e => {
-            e.preventDefault()
-            createMessage(e.target.text.value)
-            e.target.reset()
+          onSubmit={(e: React.SyntheticEvent) => {
+            const formEl = e.target as FormType;
+            e.preventDefault();
+            createMessage(formEl.text.value);
+            formEl.text.value = ''
           }}
         >
           <input
